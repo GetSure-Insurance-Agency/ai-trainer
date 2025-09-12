@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "@malove86/mcp-mysql-server"
+      ],
+      "env": {
+        "MYSQL_HOST": "getsure.org",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "nhrtupqgbg",
+        "MYSQL_PASSWORD": "mHKYzGks8R",
+        "MYSQL_DATABASE": "nhrtupqgbg"
+      }
+    }
+  }
+}

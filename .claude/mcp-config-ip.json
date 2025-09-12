@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-mysql"
+      ],
+      "env": {
+        "MYSQL_HOST": "144.202.70.42",
+        "MYSQL_PORT": "3306",
+        "MYSQL_USER": "nhrtupqgbg",
+        "MYSQL_PASSWORD": "mHKYzGks8R",
+        "MYSQL_DATABASE": "nhrtupqgbg"
+      }
+    }
+  }
+}
