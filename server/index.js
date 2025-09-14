@@ -11,6 +11,10 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+// Import realtime routes
+const realtimeRoutes = require('./routes/realtime');
+app.use('/api', realtimeRoutes);
 app.use(express.static(path.join(__dirname, 'uploads')));
 
 const uploadsDir = path.join(__dirname, 'uploads');

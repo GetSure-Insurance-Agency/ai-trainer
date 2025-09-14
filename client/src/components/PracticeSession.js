@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import RealtimeAPI from '../services/realtimeAPI';
+// import RealtimeAPI from '../services/realtimeAPI';
+// import RealtimeAgentAPI from '../services/realtimeAgentAPI';
+// import DirectRealtimeAPI from '../services/directRealtimeAPI';
+import RealtimeWebRTC from '../services/realtimeWebRTC';
 
 const objectionScenarios = [
   { value: 'price', label: 'Price concerns - "That sounds expensive"' },
@@ -11,7 +14,8 @@ const objectionScenarios = [
   { value: 'research', label: 'Need to research - "I want to shop around first"' }
 ];
 
-const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
+// No longer need API key in the client - using server-side client secrets
+// const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
 
 function PracticeSession() {
   const [selectedObjection, setSelectedObjection] = useState('price');
@@ -34,45 +38,31 @@ function PracticeSession() {
     };
   }, []);
 
+  // WebRTC handles audio playback automatically through the audio track
   const setupAudioPlayback = async () => {
-    try {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)({
-        sampleRate: 24000
-      });
-    } catch (error) {
-      console.error('Error setting up audio context:', error);
-    }
+    // No longer needed with WebRTC - audio is handled via RTCPeerConnection
+    console.log('Audio playback handled by WebRTC');
   };
 
   const playAudioData = async (audioData) => {
-    if (!audioContextRef.current) return;
-
-    try {
-      const audioBuffer = await audioContextRef.current.decodeAudioData(audioData);
-      const source = audioContextRef.current.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContextRef.current.destination);
-      source.start();
-    } catch (error) {
-      console.error('Error playing audio:', error);
-    }
+    // WebRTC handles this automatically via the remote audio track
+    // This function is kept for compatibility but not used
   };
 
   const startCall = async () => {
-    if (!OPENAI_API_KEY) {
-      alert('OpenAI API key not configured. Please add REACT_APP_OPENAI_API_KEY to your .env file.');
-      return;
-    }
-
     try {
       setConnectionStatus('connecting');
       
       await setupAudioPlayback();
       
-      realtimeAPIRef.current = new RealtimeAPI(OPENAI_API_KEY);
+      // No API key needed - server handles authentication via client secrets
+      realtimeAPIRef.current = new RealtimeWebRTC();
       
-      realtimeAPIRef.current.onAudioReceived = (audioData) => {
-        playAudioData(audioData);
+      // WebRTC handles audio automatically via the audio track
+      // Set up transcript handler instead
+      realtimeAPIRef.current.onTranscript = (transcript) => {
+        console.log(`[${transcript.type}]:`, transcript.text);
+        // You can update UI with transcripts here
       };
 
       realtimeAPIRef.current.onMessage = (message) => {
@@ -84,7 +74,9 @@ function PracticeSession() {
 
       realtimeAPIRef.current.setObjectionScenario(selectedObjection);
 
-      const stream = await realtimeAPIRef.current.startAudioInput();
+      // WebRTC handles audio input automatically through getUserMedia in connect()
+      // Get the media stream for recording purposes
+      const stream = realtimeAPIRef.current.mediaStream;
       
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
@@ -108,9 +100,19 @@ function PracticeSession() {
         setCallDuration(prev => prev + 1);
       }, 1000);
 
-      setTimeout(() => {
-        realtimeAPIRef.current.createResponse();
-      }, 1500);
+      // Give the session a moment to initialize, then start the conversation
+      setTimeout(async () => {
+        try {
+          console.log('🎯 Starting conversation...');
+          
+          // Start the conversation using the new API method
+          await realtimeAPIRef.current.startConversation();
+        } catch (error) {
+          console.error('Error starting conversation:', error);
+          setConnectionStatus('error');
+          alert('Error starting conversation. Please try again.');
+        }
+      }, 3000);
 
     } catch (error) {
       console.error('Error starting call:', error);
